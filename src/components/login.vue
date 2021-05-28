@@ -29,6 +29,7 @@
   </div>
 </template>
 <script>
+import { loginnet } from "@/network/home";
 export default {
   data() {
     return {
@@ -60,13 +61,15 @@ export default {
       //形参valid是个布尔值，根据登录表单规则进行验证，通过为true，不通过为flase
       this.$refs.loginform.validate(async (valid) => {
         if (!valid) return;
-        const { data: res } = await this.$http.post("login", this.form);
-        if (res.meta.status !== 200) return this.$message.error("账号密码错误");
-        this.$message.success("登录成功");
-        //1.登录网站才能访问其他页面，在会话期间将token保存在sessionStorage中，
-        window.sessionStorage.setItem("token", res.data.token);
-        //2.登录成功跳转到主页
-        this.$router.push("/home");
+        loginnet(this.form.username, this.form.password).then((res) => {
+          if (res.meta.status !== 200)
+            return this.$message.error("账号密码错误");
+          this.$message.success("登录成功");
+          //1.登录网站才能访问其他页面，在会话期间将token保存在sessionStorage中，
+          window.sessionStorage.setItem("token", res.data.token);
+          //2.登录成功跳转到主页
+          this.$router.push("/home");
+        });
       });
     },
   },
