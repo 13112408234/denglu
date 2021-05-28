@@ -18,9 +18,11 @@
           ></el-input>
         </el-form-item>
         <!-- 按钮 -->
-        <el-form-item class="btns">
+        <el-form-item class="el-form-item-button">
           <el-button type="primary" @click="loginyz">登录</el-button>
-          <el-button type="info" @click="chozhi">重置</el-button>
+          <el-button type="info" @click="chozhi" class="el-form-item1"
+            >重置</el-button
+          >
         </el-form-item>
       </el-form>
     </div>
@@ -84,5 +86,17 @@ export default {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+.login-form {
+  position: relative;
+  padding: 90px 40px;
+}
+.el-form-item-button {
+  padding: 20px 100px;
+  position: relative;
+}
+.el-form-item1 {
+  position: absolute;
+  right: 0px;
 }
 </style>

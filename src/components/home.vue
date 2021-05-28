@@ -1,7 +1,7 @@
 <template>
   <div>
     <div>首页</div>
-    <el-button @click="logout">退出</el-button>
+    <el-button @click="logout" class="el-button-logout">退出</el-button>
   </div>
 </template>
 <script>
@@ -15,4 +15,9 @@ export default {
 };
 </script>
 <style scoped>
+.el-button-logout {
+  position: absolute;
+  right: 20px;
+  top: 10px;
+}
 </style>
