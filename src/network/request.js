@@ -3,7 +3,7 @@ import axios from 'axios'
 export function request(config) {
   // 1.创建axios的实例
   const instance = axios.create({
-    baseURL: 'http://www.timemeetyou.com:8889/api/private/v1',
+    baseURL: 'http://106.53.73.30:8888/api/private/v1',
     timeout: 5000
   })
 
@@ -12,7 +12,6 @@ export function request(config) {
   // 2.2验证每一次请求是否都添加了token，在下面打印 console.log(config)，看看headers是否添加了
   instance.interceptors.request.use(config => {
     config.headers.Authorization = window.sessionStorage.getItem("token")
-    console.log(config)
     return config
   }, err => {
     // console.log(err);
