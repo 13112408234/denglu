@@ -38,16 +38,16 @@
           <template v-slot="scope">
             <!-- 修改按钮 -->
             <el-tooltip content="修改" placement="top">
-              <el-button type="primary" icon="el-icon-edit" @click="dialogVisixiiu(scope.row)"></el-button>
+              <el-button size="mini" type="primary" icon="el-icon-edit" @click="dialogVisixiiu(scope.row)"></el-button>
             </el-tooltip>
             <!-- 删除按钮 -->
             <el-tooltip content="删除" placement="top">
-              <el-button type="danger" icon="el-icon-delete" @click="open(scope.row.id)">
+              <el-button size="mini" type="danger" icon="el-icon-delete" @click="open(scope.row.id)">
               </el-button>
             </el-tooltip>
             <!-- 分配角色按钮 -->
             <el-tooltip content="分配角色" placement="top">
-              <el-button type="warning" icon="el-icon-setting"></el-button>
+              <el-button @click="setRole(scope.row)" size="mini" type="warning" icon="el-icon-setting"></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -105,6 +105,25 @@
           <el-button type="primary" @click="editUserInfo">确 定</el-button>
         </span>
       </el-dialog>
+      <!-- 分配角色对话框 -->
+      <el-dialog title="提示" :visible.sync="dialogVisiblefpei" width="50%">
+        <div>
+          <p>当前的用户：{{userInfo.username}}</p>
+          <p>当前的角色：{{userInfo.role_name}}</p>
+          <p>分配新角色：<el-select v-model="selectedRoleId" placeholder="请选择">
+              <el-option v-for="item in roleList" :key="item.id" :label="item.roleName" :value="item.id">
+              </el-option>
+            </el-select>
+          </p>
+        </div>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="dialogVisiblefpei = false">取 消</el-button>
+          <el-button type="primary" @click="saveRoleInfo">确 定</el-button>
+        </span>
+      </el-dialog>
+
+
+
     </el-card>
   </div>
 </template>
@@ -115,7 +134,9 @@
     stateanniu,
     addFormtijiao,
     addFormdelete,
-    addFormput
+    addFormput,
+    addFormput_roles,
+    addFormput_xiuroles
   } from "@/network/home";
   export default {
     data() {
@@ -169,7 +190,15 @@
           email: '',
           mobile: '',
           id: ''
-        }
+        },
+        //分配角色对话框
+        dialogVisiblefpei: false,
+        //分配角色用户变量
+        userInfo: {},
+        //所有角色的数据列表
+        roleList: [],
+        //已选中的角色id值
+        selectedRoleId: ''
       }
     },
     created() {
@@ -276,7 +305,34 @@
           });
         });
       },
-
+      //展示分配角色的对话框
+      setRole(userInfo) {
+        //清空已选中的角色id值记录
+        this.selectedRoleId = '',
+          this.dialogVisiblefpei = true
+        //在展示对话框之前获取角色列表
+        this.userInfo = userInfo
+        //角色分配网络请求
+        addFormput_roles().then(res => {
+          this.roleList = res.data
+        })
+      },
+      //点击按钮分配角色
+      saveRoleInfo() {
+        if (!this.selectedRoleId) {
+          return this.$message.error('请选则要分配的角色')
+        }
+        //关闭对话框
+        this.dialogVisiblefpei = false
+        addFormput_xiuroles(this.userInfo.id, this.selectedRoleId).then(res => {
+          if (res.meta.status != 200) {
+            return this.$message.error("修改失败");
+          }
+          this.$message.success("修改成功");
+          //刷新用户列表
+          this.getUserListpage()
+        })
+      }
     }
   };
 </script>

@@ -72,6 +72,29 @@ export function addFormput(id, email, mobile) {
   })
 }
 
+//角色分配请求
+  export function addFormput_roles() {
+    
+    return request({
+      url:'/roles'
+    })
+
+    }
+
+//修改用户角色
+export function addFormput_xiuroles(id,rid) {
+    
+  return request({
+    url:'/users/'+id+'/role',
+    method:'put',
+    data:{
+      rid
+    }
+  })
+  }
+
+
+
 
 
 // 函数调用 -> 压入函数栈(保存函数调用过程中所有变量)
