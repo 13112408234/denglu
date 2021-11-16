@@ -84,7 +84,7 @@
         <!-- 底部按钮区域 -->
         <span slot="footer" class="dialog-footer">
           <el-button @click="dialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="addUser">确 定</el-button>
+          <el-button type="primary" @click="addUser">确定</el-button>
         </span>
       </el-dialog>
       <!-- 修改的弹框 -->
@@ -121,9 +121,6 @@
           <el-button type="primary" @click="saveRoleInfo">确 定</el-button>
         </span>
       </el-dialog>
-
-
-
     </el-card>
   </div>
 </template>
@@ -158,10 +155,10 @@
 
         //添加用户的表单数据
         addForm: {
-          username: 'fzppp',
-          password: '123456',
-          email: '2265120248@qq.com',
-          mobile: '13112408234'
+          username: '',
+          password: '',
+          email: '',
+          mobile: ''
         },
         //添加表单验证规则对象
         addFormRules: {
@@ -268,7 +265,6 @@
       addDialogClosed() {
         this.$refs.addFormRef.resetFields()
       },
-
       //监听用户添加对话框确认添加时验证表单数据
       addUser() {
         this.$refs.addFormRef.validate(valid => {
