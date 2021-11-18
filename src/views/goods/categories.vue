@@ -23,32 +23,32 @@
   </div>
 </template>
 <script>
-import bread from "@/components/conste/user/bread"; //面包屑
-import { categoriesitem } from "@/network/categories";
-export default {
-  components: {
-    bread,
-  },
-  data() {
-    return {
-      //请求传入的参数
-      querInfo: {
-        type: 3,
-        pagenum: 1,
-        pagesize: 5,
-      },
-      //保存请求列表数据
-      tableData: [],
-    };
-  },
-  created() {
-    //商品分类列表请求
-    categoriesitem().then((res) => {
-      this.tableData = res.data;
-      console.log(res);
-    });
-  },
-};
+  import bread from "@/components/conste/user/bread"; //面包屑
+  import { categoriesitem } from "@/network/categories";
+  export default {
+    components: {
+      bread,
+    },
+    data() {
+      return {
+        //请求传入的参数
+        querInfo: {
+          type: 3,
+          pagenum: 1,
+          pagesize: 5,
+        },
+        //保存请求列表数据
+        tableData: [],
+      };
+    },
+    created() {
+      //商品分类列表请求
+      categoriesitem().then((res) => {
+        this.tableData = res.data;
+
+      });
+    },
+  };
 </script>
 <style scoped>
 </style>
