@@ -1,14 +1,12 @@
 import { request } from './request'
 
-//级联选择器的商品列表
-export function ProductList(type, pagenum, pagesize) {
+//参数列表
+export function parameterList(id, sel) {
     return request({
-        url: '/categories',
+        url: '/categories/' + id + '/attributes',
         method: 'get',
-        data: {
-            type,
-            pagenum,
-            pagesize
+        params: {
+            sel
         }
     })
 }
