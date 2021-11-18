@@ -3,6 +3,7 @@ import { request } from './request'
 export function categoriesitem(type, pagenum, pagesize) {
     return request({
         url: '/categories',
+        method: 'get',
         params: {
             type,
             pagenum,

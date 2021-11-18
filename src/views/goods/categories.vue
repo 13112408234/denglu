@@ -144,6 +144,7 @@
           value: 'cat_id',//具体选择哪一个值的属性
           label: 'cat_name',//你所看到的是哪一个属性
           children: 'children',//父子嵌套用的是哪一个属性
+          expandTrigger: 'hover' //鼠标移动显示下一级
         },
         //选中的父级分类的id数组
         selectedKeys: [],
@@ -266,7 +267,6 @@
         }).catch(() => {
           this.$message.error("删除已取消 ");
         });
-
       },
 
       //编辑
