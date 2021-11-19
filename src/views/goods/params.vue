@@ -24,7 +24,7 @@
       <el-tabs v-model="activeName" @tab-click="handleTabClick">
         <!-- 添加动态参数的面板 -->
         <el-tab-pane label="动态参数" name="many">
-          <el-button type="primary" size="mini" :disabled="disabled">添加参数</el-button>
+          <el-button type="primary" size="mini" :disabled="disabled" @click="adddDialogVisible=true">添加参数</el-button>
           <!-- 动态参数表格 -->
           <el-table :data="manyTableDate" border stripe>
             <!-- 展开行 -->
@@ -35,15 +35,15 @@
             <el-table-column label="参数名称" prop="attr_name"></el-table-column>
             <el-table-column label="操作">
               <template slot-scope="scope">
-                <el-button type="primary" icon="el-icon-edit" size="mini">编辑</el-button>
-                <el-button type="danger" icon="el-icon-delete" size="mini">删除</el-button>
+                <el-button type="primary" icon="el-icon-edit" size="mini" @click="putclick(scope.row)">动态编辑</el-button>
+                <el-button type="danger" icon="el-icon-delete" size="mini" @click="open(scope.row)">删除</el-button>
               </template>
             </el-table-column>
           </el-table>
         </el-tab-pane>
         <!-- 添加静态属性的面板 -->
         <el-tab-pane label="静态属性" name="only">
-          <el-button type="primary" size="mini" :disabled="disabled">添加属性</el-button>
+          <el-button type="primary" size="mini" :disabled="disabled" @click="adddDialogVisible=true">添加属性</el-button>
           <!-- 静态属性表格 -->
           <el-table :data="onlyTableDate" border stripe>
             <!-- 展开行 -->
@@ -53,8 +53,9 @@
             <el-table-column label="属性名称" prop="attr_name"></el-table-column>
             <el-table-column label="操作">
               <template slot-scope="scope">
-                <el-button type="primary" icon="el-icon-edit" size="mini">编辑</el-button>
-                <el-button type="danger" icon="el-icon-delete" size="mini">删除</el-button>
+                <el-button type="primary" icon="el-icon-edit" size="mini" @click="putclick(scope.row)">编辑
+                </el-button>
+                <el-button type="danger" icon="el-icon-delete" size="mini" @click="open(scope.row)">删除</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -62,11 +63,28 @@
       </el-tabs>
     </el-card>
     <!-- 添加参数的对话框 -->
-    <el-dialog title="提示" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
-      <span>这是一段信息</span>
+    <el-dialog :title="'添加' +titleText" :visible.sync="adddDialogVisible" width="50%" @close="addDialogClosedm">
+      <el-form :model="addForm" :rules="rules" ref="addruleForm" label-width="100px">
+        <el-form-item :label="titleText" prop="attr_name">
+          <el-input v-model="addForm.attr_name"></el-input>
+        </el-form-item>
+      </el-form>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+        <el-button @click="adddDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addParams">确 定</el-button>
+      </span>
+    </el-dialog>
+
+    <!-- 修改参数的对话框 -->
+    <el-dialog title="修改参数" :visible.sync="putDialogVisible" width="50%">
+      <el-form :model="putForm" :rules="rules" ref="addruleForm" label-width="100px">
+        <el-form-item :label="titleText" prop="attr_name">
+          <el-input v-model="putForm.attr_name"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="putDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="putParams">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -74,7 +92,7 @@
 
 <script>
   import { categoriesitem } from "@/network/categories.js";
-  import { parameterList } from "@/network/params.js";
+  import { parameterList, AddAttribute, EditingParameters, DeleteParameters } from "@/network/params.js";
   export default {
     components: {},
     props: {},
@@ -99,15 +117,40 @@
         manyTableDate: [],
         //静态属性的数据
         onlyTableDate: [],
+        //添加参数对话框显示隐藏
+        adddDialogVisible: false,
+        //添加参数的表单数据对象
+        addForm: {
+          attr_name: ''
+        },
+        //添加表单验证规则
+        rules: {
+          attr_name: [{ required: true, message: '名称不能为空' },]
+        },
+        // 修改参数的对话框
+        putDialogVisible: false,
+        //修改保存的数据
+        putForm: {
+          attr_name: ''
+        },
+        butAttr_id: '',
       };
     },
     watch: {},
-    computed: {},
+    computed: {
+      titleText() {
+        if (this.activeName === "many") {
+          return "动态参数"
+        }
+        return "静态属性"
+      }
+
+    },
     methods: {
       //参数列表请求封装
       ParameterPackage() {
         parameterList(this.cateId, this.activeName).then((res) => {
-          if (res.meta.status != 200) return this.$message.error("列表获取失败");
+          if (res.meta.status != 200) return;
           console.log(res);
           if (this.activeName === "many") {
             this.manyTableDate = res.data;
@@ -141,9 +184,71 @@
       //tab页签点击事件的处理函数
       handleTabClick() {
         //发起参数列表请求
-        this.ParameterPackage();
-        console.log(this.activeName);
+        this.ParameterPackage()
+        //在没有选中级联选择框内容的时候，提示用户
+        if (this.Classification.length < 3) {
+          this.$message.error("请选择商品分类")
+        }
+        console.log(this.Classification);
       },
+      //监听对话框的关闭事件
+      addDialogClosedm() {
+        this.$refs.addruleForm.resetFields()
+      },
+      //点击按钮添加参数
+      addParams() {
+        this.$refs.addruleForm.validate(valid => {
+          if (!valid) return
+          AddAttribute(this.cateId, this.addForm.attr_name, this.activeName)
+            .then((res) => {
+              console.log(res)
+              this.adddDialogVisible = false,
+                this.$message.success("添加成功");
+              this.ParameterPackage()
+            })
+        })
+      },
+      // 点击修改
+      putclick(row) {
+        this.putDialogVisible = true,
+          this.putForm.attr_name = row.attr_name,
+          this.butAttr_id = row.attr_id
+        console.log(row)
+      },
+      //确定修改
+      putParams() {
+        EditingParameters(this.cateId, this.butAttr_id, this.putForm.attr_name, this.activeName)
+          .then((res) => {
+            if (res.meta.status != 200) return
+            console.log(res, this.activeName)
+            // 更新列表
+            this.ParameterPackage()
+            this.$message.success("添加成功");
+            //关闭修改窗口
+            this.putDialogVisible = false
+          })
+      },
+      //删除静态属性或者动态参数
+      open(row) {
+        this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          DeleteParameters(this.cateId, row.attr_id).then((res) => {
+            if (res.meta.status != 200) return
+            // 更新列表
+            this.ParameterPackage()
+            this.$message.success("添加成功");
+            console.log(res)
+          })
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
+      }
     },
     created() {
       //发起级联选择框的数据请求
