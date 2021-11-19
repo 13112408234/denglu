@@ -28,7 +28,22 @@
           <!-- 动态参数表格 -->
           <el-table :data="manyTableDate" border stripe>
             <!-- 展开行 -->
-            <el-table-column type="expand"></el-table-column>
+            <el-table-column type="expand">
+              <template slot-scope="scope">
+                <!-- //循环渲染Tag标签 -->
+                <el-tag closable v-for="(item,i) in scope.row.attr_vals" :key="i" @close="handleClose(i,scope.row)">
+                  {{item}}
+                </el-tag>
+                <!-- 输入文本框 inputVisible控制input显示和隐藏，v-model文本框输入的内容， @keyup.enter.native失去焦点会触发-->
+                <el-input class="input-new-tag" v-if="scope.row.inputVisible" v-model="scope.row.inputValue"
+                  ref="saveTagInput" size="small" @keyup.enter.native="handleInputConfirm(scope.row)"
+                  @blur="handleInputConfirm(scope.row)">
+                </el-input>
+                <!-- 添加按钮 -->
+                <el-button v-else class="button-new-tag" size="small" @click="showInput(scope.row)">+ New Tag
+                </el-button>
+              </template>
+            </el-table-column>
             <!-- 索引列 -->
             <el-table-column type="index"></el-table-column>
 
@@ -47,7 +62,22 @@
           <!-- 静态属性表格 -->
           <el-table :data="onlyTableDate" border stripe>
             <!-- 展开行 -->
-            <el-table-column type="expand"></el-table-column>
+            <el-table-column type="expand">
+              <template slot-scope="scope">
+                <!-- //循环渲染Tag标签 -->
+                <el-tag closable v-for="(item,i) in scope.row.attr_vals" :key="i">
+                  {{item}}
+                </el-tag>
+                <!-- 输入文本框 inputVisible控制input显示和隐藏，v-model文本框输入的内容， @keyup.enter.native失去焦点会触发-->
+                <el-input class="input-new-tag" v-if="scope.row.inputVisible" v-model="scope.row.inputValue"
+                  ref="saveTagInput" size="small" @keyup.enter.native="handleInputConfirm(scope.row)"
+                  @blur="handleInputConfirm(scope.row)">
+                </el-input>
+                <!-- 添加按钮 -->
+                <el-button v-else class="button-new-tag" size="small" @click="showInput(scope.row)">+ New Tag
+                </el-button>
+              </template>
+            </el-table-column>
             <!-- 索引列 -->
             <el-table-column type="index"></el-table-column>
             <el-table-column label="属性名称" prop="attr_name"></el-table-column>
@@ -77,7 +107,7 @@
 
     <!-- 修改参数的对话框 -->
     <el-dialog title="修改参数" :visible.sync="putDialogVisible" width="50%">
-      <el-form :model="putForm" :rules="rules" ref="addruleForm" label-width="100px">
+      <el-form :model="putForm" :rules="rules" ref="putruleForm" label-width="100px">
         <el-form-item :label="titleText" prop="attr_name">
           <el-input v-model="putForm.attr_name"></el-input>
         </el-form-item>
@@ -134,7 +164,12 @@
           attr_name: ''
         },
         butAttr_id: '',
+        //控制按钮与文本框的输入形式
+        inputVisible: false,
+        //文本框输入的内容
+        inputValue: '',
       };
+
     },
     watch: {},
     computed: {
@@ -151,7 +186,13 @@
       ParameterPackage() {
         parameterList(this.cateId, this.activeName).then((res) => {
           if (res.meta.status != 200) return;
-          console.log(res);
+          //对拿到的tag等等数据做一个分割
+          res.data.forEach(item => {
+            item.attr_vals = item.attr_vals ? item.attr_vals.split(' ') : []
+            item.inputVisible = false,
+              item.inputValue = ''
+          });
+          console.log(res)
           if (this.activeName === "many") {
             this.manyTableDate = res.data;
           } else {
@@ -163,14 +204,25 @@
       //级联选择器列表请求封装
       ProductListshu() {
         categoriesitem().then((res) => {
+
           this.ProductData = res.data;
-          console.log(res);
         });
+      },
+      //删除tag封装
+      tagdelete(row) {
+        EditingParameters(this.cateId, row.attr_id, row.attr_name, row.attr_sel, row.attr_vals.join(' '))
+          .then((res) => {
+            if (res.meta.status != 200) return
+            this.$message.success("修改参数项成功");
+          })
       },
       //级联选择框发生变化，会触发该函数
       handleChange() {
         if (this.Classification.length != 3) {
           this.Classification = [];
+          this.manyTableDate = [];
+          this.onlyTableDate = []
+          this.$message.error("只能为三级分类设置相关参数")
           return;
         }
         //级联被选中，下面按钮启用
@@ -189,7 +241,6 @@
         if (this.Classification.length < 3) {
           this.$message.error("请选择商品分类")
         }
-        console.log(this.Classification);
       },
       //监听对话框的关闭事件
       addDialogClosedm() {
@@ -201,7 +252,6 @@
           if (!valid) return
           AddAttribute(this.cateId, this.addForm.attr_name, this.activeName)
             .then((res) => {
-              console.log(res)
               this.adddDialogVisible = false,
                 this.$message.success("添加成功");
               this.ParameterPackage()
@@ -213,20 +263,23 @@
         this.putDialogVisible = true,
           this.putForm.attr_name = row.attr_name,
           this.butAttr_id = row.attr_id
-        console.log(row)
       },
       //确定修改
       putParams() {
-        EditingParameters(this.cateId, this.butAttr_id, this.putForm.attr_name, this.activeName)
-          .then((res) => {
-            if (res.meta.status != 200) return
-            console.log(res, this.activeName)
-            // 更新列表
-            this.ParameterPackage()
-            this.$message.success("添加成功");
-            //关闭修改窗口
-            this.putDialogVisible = false
-          })
+
+        this.$refs.putruleForm.validate(valid => {
+          if (!valid) return
+          EditingParameters(this.cateId, this.butAttr_id, this.putForm.attr_name, this.activeName)
+            .then((res) => {
+              if (res.meta.status != 200) return
+              // 更新列表
+              this.ParameterPackage()
+              this.$message.success("添加成功");
+              //关闭修改窗口
+              this.putDialogVisible = false
+            })
+        })
+
       },
       //删除静态属性或者动态参数
       open(row) {
@@ -240,7 +293,6 @@
             // 更新列表
             this.ParameterPackage()
             this.$message.success("添加成功");
-            console.log(res)
           })
         }).catch(() => {
           this.$message({
@@ -248,7 +300,40 @@
             message: '已取消删除'
           });
         });
-      }
+      },
+      //文本框失去焦点或摁下了Enter都会触发
+      handleInputConfirm(row) {
+        //用户输入多个空格，没有输入真实内容时，数组清空
+        if (row.inputValue.trim().length === 0) {
+          row.inputValue = '',
+            row.inputVisible = false
+          return
+        }
+        //如果没有return，证明需要做后期处理
+        //用户输入的内容push到row.attr_vals数组里
+        row.attr_vals.push(row.inputValue.trim()),
+          //input重置为空
+          row.inputValue = ''
+        //隐藏输入框
+        row.inputVisible = false
+        // 发起添加请求
+        this.tagdelete(row)
+      },
+      //点击按钮展示文本输入框
+      showInput(row) {
+        row.inputVisible = true
+        //自动获取焦点
+        //$nextTick当页面渲染完毕后才会执行里面代码
+        this.$nextTick(_ => {
+          this.$refs.saveTagInput.$refs.input.focus();
+        });
+      },
+      //删除对应的参数可选项tag
+      handleClose(i, row) {
+        row.attr_vals.splice(i, 1)
+        // 发起添加请求
+        this.tagdelete(row)
+      },
     },
     created() {
       //发起级联选择框的数据请求
@@ -266,5 +351,13 @@
 
   .el-cascader {
     margin-left: 10px;
+  }
+
+  .el-tag {
+    margin: 10px
+  }
+
+  .input-new-tag {
+    width: 100px;
   }
 </style>

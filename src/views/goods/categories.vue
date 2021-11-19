@@ -192,9 +192,8 @@
       addcal() {
         categoriesitem(2,)
           .then((res) => {
-            console.log(res.data)
+
             this.parentCateList = res.data
-            console.log(this.parentCateList)
 
           })
       },
@@ -261,7 +260,7 @@
             //商品分类列表请求
             this.getCateList()
             this.$message.success("删除成功");
-            console.log(res)
+
           })
 
         }).catch(() => {
@@ -285,8 +284,6 @@
             this.getCateList()
             this.$message.success("名称修改成功");
             this.EditDisplay = false
-            console.log(res)
-
           })
 
         })
