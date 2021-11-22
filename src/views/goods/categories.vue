@@ -49,9 +49,8 @@
         <el-form-item label="分类名称:" prop="cat_name">
           <el-input v-model="addcatInfo.cat_name" autocomplete="off"></el-input>
         </el-form-item>
-        <!-- :options用来指定数据源,props用户选中的数据，v-model选中的值双向绑定到data中一定是数组， @change选择器中发生变化就会触发 
-        clearable可以在旁边清空
-        -->
+        <!-- :options指定数据源（要展示的数据），:props是配置项,@change选中时触发，v-model选中了第几级数据，用length判定
+        clearable可以在旁边清空-->
         <el-form-item label="父级分类:">
           <el-cascader change-on-select clearable v-model="selectedKeys" :options="parentCateList"
             @change="parentCateChanged" :props="cascaderProps">

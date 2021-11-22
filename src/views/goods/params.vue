@@ -50,7 +50,7 @@
             <el-table-column label="参数名称" prop="attr_name"></el-table-column>
             <el-table-column label="操作">
               <template slot-scope="scope">
-                <el-button type="primary" icon="el-icon-edit" size="mini" @click="putclick(scope.row)">动态编辑</el-button>
+                <el-button type="primary" icon="el-icon-edit" size="mini" @click="putclick(scope.row)">编辑</el-button>
                 <el-button type="danger" icon="el-icon-delete" size="mini" @click="open(scope.row)">删除</el-button>
               </template>
             </el-table-column>
@@ -65,7 +65,7 @@
             <el-table-column type="expand">
               <template slot-scope="scope">
                 <!-- //循环渲染Tag标签 -->
-                <el-tag closable v-for="(item,i) in scope.row.attr_vals" :key="i">
+                <el-tag @close="handleClose(i,scope.row)" closable v-for=" (item,i) in scope.row.attr_vals" :key="i">
                   {{item}}
                 </el-tag>
                 <!-- 输入文本框 inputVisible控制input显示和隐藏，v-model文本框输入的内容， @keyup.enter.native失去焦点会触发-->
