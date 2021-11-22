@@ -284,8 +284,8 @@
                         this.pics,
                         form.attrs,
                     ).then((res) => {
-                        this.$router.push('/home/goods')
-                        console.log(res)
+                        this.$router.push('/goods')
+                        this.$message.success('添加成功');
                     })
 
                 })

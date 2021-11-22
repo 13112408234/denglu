@@ -7,6 +7,8 @@ import TreeTable from 'vue-table-with-tree-grid'
 import VueQuillEditor from 'vue-quill-editor'
 
 
+
+
 // css
 import 'quill/dist/quill.core.css'
 import 'quill/dist/quill.snow.css'

@@ -54,11 +54,13 @@
         <el-table-column prop="roleDesc" label="角色描述"> </el-table-column>
         <el-table-column prop="roleName" label="操作">
           <template v-slot="scope">
-            <el-button type="primary" icon="el-icon-edit" @click="dialogVisible_EditRole = true,EditRoleRes(scope.row)">
+            <el-button type="primary" icon="el-icon-edit" @click="dialogVisible_EditRole = true,EditRoleRes(scope.row)"
+              size="mini">
               编辑
             </el-button>
-            <el-button type="danger" icon="el-icon-delete" @click="open(scope.row)">删除</el-button>
-            <el-button type="warning" icon="el-icon-setting" @click="showSetRight(scope.row)">分配权限</el-button>
+            <el-button type="danger" icon="el-icon-delete" @click="open(scope.row)" size="mini">删除</el-button>
+            <el-button type="warning" icon="el-icon-setting" @click="showSetRight(scope.row)" size="mini">分配权限
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
