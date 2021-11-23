@@ -58,7 +58,7 @@ const routes = [
         component: categories,
       },
       {
-        path: '/goods/Add',
+        path: '/Add',
         component: Add,
       },
       {
